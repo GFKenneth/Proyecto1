@@ -19,13 +19,17 @@ public class Main {
             SegmentadorFiguras segmentador = new SegmentadorFiguras();
             ArrayList<FiguraDetectada> figuras = segmentador.segmentar(imagen);
 
+            Clasificador clasificador = new Clasificador();
+
             System.out.println("Figuras encontradas: " + figuras.size());
             for (int i = 0; i < figuras.size(); i++) {
                 FiguraDetectada f = figuras.get(i);
+                TipoFigura tipo = clasificador.clasificar(f);
                 System.out.println("Figura " + (i + 1)
                         + " | color: " + f.getColorHex()
                         + " | area (pixeles): " + f.getArea()
-                        + " | pixeles de contorno: " + f.getContorno().size());
+                        + " | pixeles de contorno: " + f.getContorno().size()
+                        + " | tipo: " + tipo);
             }
         } catch (IOException e) {
             System.out.println("Error al leer la imagen: " + e.getMessage());

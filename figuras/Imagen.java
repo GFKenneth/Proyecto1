@@ -1,4 +1,3 @@
-
 package figuras;
  
 public class Imagen {
