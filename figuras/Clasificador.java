@@ -3,7 +3,7 @@ package figuras;
 import java.util.ArrayList;
 
 public class Clasificador {
-    private static final double UMBRAL_CIRCULARIDAD = 0.97;
+    private static final double UMBRAL_CIRCULARIDAD = 0.97; // Circulo ~1.0, cuadrado/rombo ~0.8
 
     public TipoFigura clasificar(FiguraDetectada figura) {
         ArrayList<Punto> hull = cierreConvexo(figura.getContorno());
@@ -26,9 +26,11 @@ public class Clasificador {
 
     }
 
+    //Juntar vertices falsos que salen de un borde diagonal pixelado
     private ArrayList<Punto> filtrarColineales(ArrayList<Punto> hull){
         if (hull.size() <= 2) return hull;
 
+        //Quitar puntos casi rectos
         ArrayList<Punto> resultado = new ArrayList<Punto>();
         int n = hull.size();
 
@@ -46,6 +48,7 @@ public class Clasificador {
             double mag2 = Math.hypot(d2x, d2y);
             
             if (mag1 > 0 && mag2 > 0){
+                //cos del angulo entre ambos segmentos
                 double productoPunto = (d1x * d2x + d1y * d2y) / (mag1 * mag2);
                 if (productoPunto < 0.98){
                     resultado.add(actual);
@@ -55,6 +58,7 @@ public class Clasificador {
             }
         }
         
+        //Junta puntos muy cercanos entre si
         ArrayList<Punto> esquinasFinales = new ArrayList<Punto>();
         int m = resultado.size();
         for (int i = 0; i < m; i++){
@@ -105,6 +109,7 @@ public class Clasificador {
         return inferior;
     }
 
+    // Positivo si o->a->b gira a la izquierda, negativo si gira a la derecha
     private double cruz(Punto o, Punto a, Punto b) {
         return (double) (a.getColumna() - o.getColumna()) * (b.getFila() - o.getFila())
         - (double) (a.getFila() - o.getFila()) * (b.getColumna() - o.getColumna());
