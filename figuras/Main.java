@@ -6,7 +6,8 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.out.println("Uso: java figuras.Main <ruta_imagen.bmp>");
+            System.out.println("No se ejecutó el programa.");
+            System.out.println("Modo de uso: java figuras.Main <ruta_imagen.bmp>");
             return;
         }
 

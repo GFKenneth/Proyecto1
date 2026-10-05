@@ -3,10 +3,11 @@ package figuras;
 import java.util.ArrayList;
 
 public class Clasificador {
-    private static final double UMBRAL_CIRCULARIDAD = 0.9;
+    private static final double UMBRAL_CIRCULARIDAD = 0.97;
 
     public TipoFigura clasificar(FiguraDetectada figura) {
         ArrayList<Punto> hull = cierreConvexo(figura.getContorno());
+        ArrayList<Punto> esquinas = filtrarColineales(hull);
         double perimetro = calcularPerimetro(hull);
         double circularidad = calcularCircularidad(figura.getArea(), perimetro);
 
@@ -14,7 +15,7 @@ public class Clasificador {
             return TipoFigura.O;
         }
 
-        switch (hull.size()) {
+        switch (esquinas.size()) {
             case 3:
                 return TipoFigura.T;
             case 4:
@@ -23,6 +24,53 @@ public class Clasificador {
                 return TipoFigura.X;
         }
 
+    }
+
+    private ArrayList<Punto> filtrarColineales(ArrayList<Punto> hull){
+        if (hull.size() <= 2) return hull;
+
+        ArrayList<Punto> resultado = new ArrayList<Punto>();
+        int n = hull.size();
+
+        for (int i = 0; i < n; i++){
+            Punto anterior = hull.get((i - 1 + n) % n);
+            Punto actual = hull.get(i);
+            Punto siguiente = hull.get((i + 1) % n);
+            
+            double d1x = actual.getColumna() - anterior.getColumna();
+            double d1y = actual.getFila() - anterior.getFila();
+            double d2x = siguiente.getColumna() - actual.getColumna();
+            double d2y = siguiente.getFila() - actual.getFila();
+            
+            double mag1 = Math.hypot(d1x, d1y);
+            double mag2 = Math.hypot(d2x, d2y);
+            
+            if (mag1 > 0 && mag2 > 0){
+                double productoPunto = (d1x * d2x + d1y * d2y) / (mag1 * mag2);
+                if (productoPunto < 0.98){
+                    resultado.add(actual);
+                }
+            } else{
+                resultado.add(actual);
+            }
+        }
+        
+        ArrayList<Punto> esquinasFinales = new ArrayList<Punto>();
+        int m = resultado.size();
+        for (int i = 0; i < m; i++){
+            Punto p = resultado.get(i);
+            boolean duplicado = false;
+            for (Punto f : esquinasFinales){
+                if (Math.hypot(p.getFila() - f.getFila(), p.getColumna() - f.getColumna()) < 8.0){
+                    duplicado = true;
+                    break;
+                }
+            }
+            if (!duplicado){
+                esquinasFinales.add(p);
+            }
+        }
+        return esquinasFinales;
     }
 
     public ArrayList<Punto> cierreConvexo(ArrayList<Punto> puntos) {
